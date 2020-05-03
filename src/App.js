@@ -6,34 +6,39 @@ import api from "./services/api";
 
 function App() {
 
-  const [projects, setProjects] = useState([]);
+  const [repositories, setRepositories] = useState([]);
 
   useEffect(() => {
     api.get('repositories').then(response => {
-      setProjects(response.data);
+      setRepositories(response.data);
     })
-  }, [projects]);
+  }, []);
 
   async function handleAddRepository() {
-    api.post('repositories',{
+    const response = await api.post('repositories',{
       title: `novo projeto ${Date.now()}`,
-    }).then(response => {
-      setProjects([...projects,response.data]);
-    })
+      url: "www.google.com.br",
+	    techs: ["ruby","node","ajax"]
+    });
+    setRepositories([...repositories, response.data]);
   }
 
   async function handleRemoveRepository(id) {
-    api.delete(`repositories/${id}`);
+    await api.delete(`repositories/${id}`);
+
+    const newRepositories = repositories.filter(repository => repository.id !== id)
+
+    setRepositories(newRepositories);
   }
 
   return (
     <div>
       <ul data-testid="repository-list">
-        {projects.map(project =>
-          <li key={project.id}>
-            {project.title}
+        {repositories.map(repository =>
+          <li key={repository.id}>
+            {repository.title}
 
-            <button onClick={() => handleRemoveRepository(project.id)}>
+            <button onClick={() => handleRemoveRepository(repository.id)}>
               Remover
             </button>
           </li>
